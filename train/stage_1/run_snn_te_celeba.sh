@@ -1,0 +1,1 @@
+python train/stage_1/snn_te_celeba.py --base train/stage_1/snn_te_celeba.yaml

@@ -1,0 +1,1 @@
+python exp/snn_te/2/snn_te_2.py --base exp/snn_te/2/snn_te_2.yaml

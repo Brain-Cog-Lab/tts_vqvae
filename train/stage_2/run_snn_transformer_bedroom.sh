@@ -1,0 +1,1 @@
+python train/stage_2/snn_transformer_bedroom.py --base train/stage_2/snn_transformer_bedroom.yaml

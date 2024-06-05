@@ -1,0 +1,130 @@
+exp:
+
+  # identifier
+  name: snn_te
+  index: 'celeba'
+
+  # resume
+  is_resume: False
+  resume_path: null
+
+  # seed
+  seed: 42
+
+
+model:
+  base_learning_rate: 4.5e-6
+  target: src.registry.model_registry.snnte_lsunbed  # also could on 64x64 e.g. CelabA
+  params:
+    # snn setting
+    snn_encoder: direct
+    snn_decoder: mean
+    time_step: 4
+
+    embed_dim: 256
+    n_embed: 1024
+    ddconfig:
+      double_z: False
+      z_channels: 256
+      resolution: 64  # on CelebA
+      in_channels: 3
+      out_ch: 3
+      ch: 128
+      ch_mult: [ 1,1,2,2,4 ]  # num_down = len(ch_mult)-1
+      num_res_blocks: 2
+      attn_resolutions: [ 4 ]  # TODO: this may need to change to (resolution / 16)
+      dropout: 0.0
+
+    lossconfig:
+      target: src.modules.losses.vqperceptual.VQLPIPSWithDiscriminator
+      params:
+        disc_conditional: False
+        disc_in_channels: 3
+        disc_start: 30001
+        disc_weight: 0.8
+        codebook_weight: 1.0
+
+data:
+  target: src.data.data_module.DataModuleFromConfig
+  params:
+    batch_size: 16
+    num_workers: 8
+    train:
+      target: src.registry.data_registry.celeba_64_key
+      params:
+        data_root: "../dataset"
+        split: full
+    # validation:
+    #   target: src.registry.data_registry.lsun_bedroom_256_20
+    #   params:
+    #     data_root: "../dataset/lsun_bedroom_0.2"
+    #     split: val
+
+################################################## pytorch-lightning config ################################################
+
+lightning:
+  trainer:
+    # multigpus settings
+    accelerator: 'gpu'
+    strategy: 'ddp_find_unused_parameters_true'
+    devices: [ 0,1,2,3 ]
+
+    # precision, options: 32-true, 16-mixed etc.
+    precision: "32-true"
+
+    # for debug
+    num_sanity_val_steps: 2
+    fast_dev_run: False
+
+    # eval frequence
+    check_val_every_n_epoch: 1
+    val_check_interval: 1.0
+
+    # show info
+    enable_progress_bar: True
+    enable_model_summary: True
+    profiler: null
+
+    # for reproducibility
+    benchmark: False
+    deterministic: False
+
+    # tricks
+    accumulate_grad_batches: 1
+    gradient_clip_val: null
+
+    # stop condition
+    max_epochs: 100
+    max_steps: -1
+
+    # dataset partition
+    limit_train_batches: 1.0
+    limit_test_batches: 1.0
+    limit_val_batches: 1.0
+    
+    
+    # callbacks for Trainer
+    callbacks:
+      ModelCheckpoint:
+        target: src.registry.callback_registry.model_ckpt
+        params:
+          save_on_train_epoch_end: True
+          every_n_epochs: 25
+          save_top_k: -1  # should save every 5 epoch
+      SetupFit:
+        target: src.registry.callback_registry.setup_fit
+        params:
+      ImageLogger:
+        target: src.registry.callback_registry.image_logger_epoch
+        params:
+          state: vq
+
+    # logging setting
+    log_every_n_steps: 100
+    loggers:
+      CSVLogger:
+        target: src.registry.logger_registry.csv_logger
+        params:
+      TensorBoardLogger:
+        target: src.registry.logger_registry.tb_logger
+        params: 

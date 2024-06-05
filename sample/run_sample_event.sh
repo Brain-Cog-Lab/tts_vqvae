@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES='0' python sample/sample_event.py --base sample/sample_event.yaml

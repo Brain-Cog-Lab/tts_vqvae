@@ -1,0 +1,150 @@
+exp:
+
+  # identifier
+  name: snn_transformer
+  index: 'nmnist'
+
+  # resume
+  is_resume: False
+  resume_path: null
+
+  # seed
+  seed: 42
+
+
+model:
+  base_learning_rate: 1.0e-06
+  target: src.models.cond_transformer.Net2NetTransformer
+  params:
+    unconditional: True
+    cond_stage_key: coord
+    transformer_config:
+      target: src.modules.transformer.mingpt_snn.SnnGPT
+      params:
+        vocab_size: 1024
+        block_size: 512
+        n_layer: 24
+        n_head: 16
+        n_embd: 1024
+        time_step: 2
+        snn_encoder: direct
+        snn_decoder: mean
+    first_stage_config:
+      target: src.registry.model_registry.dvste_epoch # epoch start discriminator
+      params:
+        # snn setting
+        snn_encoder: dvs
+        snn_decoder: dvs
+        time_step: 4
+
+        ckpt_path: res/snn_te_dvs/1/ckpt/epoch=99-step=187600.ckpt
+
+        embed_dim: 256
+        n_embed: 1024
+        ddconfig:
+          double_z: False
+          z_channels: 256
+          resolution: 64  # on 64x64 nmnist
+          in_channels: 2
+          out_ch: 2
+          ch: 128
+          ch_mult: [ 1,1,2,2,4 ]  # num_down = len(ch_mult)-1
+          num_res_blocks: 2
+          attn_resolutions: [ 4 ]  # TODO: this may need to change to (resolution / 16)
+          dropout: 0.0
+
+
+        lossconfig:
+          target: src.modules.losses.DummyLoss
+
+    cond_stage_config:
+      target: taming.modules.misc.coord.CoordStage
+      params:
+        n_embed: 1024
+        down_factor: 16
+
+
+data:
+  target: src.data.data_module.DataModuleFromConfig
+  params:
+    batch_size: 64
+    num_workers: 8
+    train:
+      target: src.registry.data_registry.nmnist_64_key
+      params:
+        data_root: ../dataset
+        split: train
+        pad: false
+    # validation:
+    #   target: taming.data.faceshq.FacesHQValidation
+    #   params:
+    #     size: 256
+    #     crop_size: 256
+
+################################################## pytorch-lightning config ################################################
+
+lightning:
+  trainer:
+    # multigpus settings
+    accelerator: 'gpu'
+    strategy: 'ddp_find_unused_parameters_true'
+    devices: [ 0,1 ]
+
+    # precision, options: 32-true, 16-mixed etc.
+    precision: "32-true"
+
+    # for debug
+    num_sanity_val_steps: 2
+    fast_dev_run: False
+
+    # eval frequence
+    check_val_every_n_epoch: 10
+
+    # show info
+    enable_progress_bar: True
+    enable_model_summary: True
+    profiler: null
+
+    # for reproducibility
+    benchmark: False
+    deterministic: False
+
+    # tricks
+    accumulate_grad_batches: 1
+    gradient_clip_val: null
+
+    # stop condition
+    max_epochs: 100
+    max_steps: -1
+
+    # dataset partition
+    limit_train_batches: 1.0
+    limit_test_batches: 1.0
+    limit_val_batches: 1.0
+    
+
+    # callbacks for Trainer
+    callbacks:
+      ModelCheckpoint:
+        target: src.registry.callback_registry.model_ckpt
+        params:
+          save_on_train_epoch_end: True
+          every_n_epochs: 25
+          save_top_k: -1  # should save every 5 epoch
+      SetupFit:
+        target: src.registry.callback_registry.setup_fit
+        params:
+      ImageLogger:
+        target: src.registry.callback_registry.image_logger_epoch_dvs
+        params:
+          state: transformer
+
+    # logging setting
+    log_every_n_steps: 200
+    loggers:
+      CSVLogger:
+        target: src.registry.logger_registry.csv_logger
+        params:
+      TensorBoardLogger:
+        target: src.registry.logger_registry.tb_logger
+        params: 

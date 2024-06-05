@@ -1,0 +1,25 @@
+exp:
+
+  # identifier
+  name: sample
+  index: 'event'
+
+  # seed
+  seed: 42
+
+
+sampler:
+  target: src.sample.BaseSampler
+  params:
+    gen_config_path: exp/snn_transformer/9/snn_transformer_9.yaml
+    gen_ckpt_path: res/snn_transformer/9/ckpt/epoch=99-step=46900.ckpt
+    batch_size: 64
+    code_h: 4
+    code_w: 4
+    verbose_time: False
+
+
+sample_params:
+  num_samples: 100
+  temperature: 1.0
+  time_unfold: true

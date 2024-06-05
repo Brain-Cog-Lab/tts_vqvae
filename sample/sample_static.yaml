@@ -1,0 +1,24 @@
+exp:
+
+  # identifier
+  name: sample
+  index: 'static'
+
+  # seed
+  seed: 42
+
+
+sampler:
+  target: src.sample.BaseSampler
+  params:
+    gen_config_path: exp/snn_transformer/7/snn_transformer_7.yaml
+    gen_ckpt_path: res/snn_transformer/7/ckpt/epoch=74-step=710475.ckpt
+    batch_size: 16
+    code_h: 16
+    code_w: 16
+    verbose_time: False
+
+
+sample_params:
+  num_samples: 10_000
+  temperature: 1.0

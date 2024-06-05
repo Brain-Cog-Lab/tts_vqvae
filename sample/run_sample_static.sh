@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES='1' python sample/sample_static.py --base sample/sample_static.yaml

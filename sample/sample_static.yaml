@@ -11,8 +11,8 @@ exp:
 sampler:
   target: src.sample.BaseSampler
   params:
-    gen_config_path: exp/snn_transformer/7/snn_transformer_7.yaml
-    gen_ckpt_path: res/snn_transformer/7/ckpt/epoch=74-step=710475.ckpt
+    gen_config_path: train/stage_2/snn_transformer_bedroom.yaml
+    gen_ckpt_path: res/snn_transformer/bedroom/ckpt/epoch=74-step=710475.ckpt
     batch_size: 16
     code_h: 16
     code_w: 16
@@ -20,5 +20,5 @@ sampler:
 
 
 sample_params:
-  num_samples: 10_000
+  num_samples: 10
   temperature: 1.0

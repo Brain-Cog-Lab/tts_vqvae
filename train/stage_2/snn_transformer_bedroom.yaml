@@ -2,10 +2,10 @@ exp:
 
   # identifier
   name: snn_transformer
-  index: 'bedroom'
+  index: 'bedroom_256'
 
   # resume
-  is_resume: true
+  is_resume: false
   resume_path: res/snn_transformer/7/ckpt/last.ckpt
 
   # seed
@@ -37,7 +37,7 @@ model:
         snn_decoder: mean
         time_step: 2
 
-        ckpt_path: res/snn_te/2/ckpt/epoch=19-step=757840.ckpt
+        ckpt_path: res/snn_te/bedroom_256/ckpt/epoch=19-step=757840.ckpt
         embed_dim: 256
         n_embed: 1024
         ddconfig:

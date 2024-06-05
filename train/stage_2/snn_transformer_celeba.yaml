@@ -37,7 +37,7 @@ model:
         snn_decoder: mean
         time_step: 4
 
-        ckpt_path: res/snn_te/4_1_1/ckpt/epoch=99-step=508800.ckpt
+        ckpt_path: res/snn_te/celeba/ckpt/epoch=99-step=508800.ckpt
         embed_dim: 256
         n_embed: 1024
         ddconfig:

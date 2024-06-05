@@ -2,7 +2,7 @@ exp:
 
   # identifier
   name: snn_te
-  index: 'x'
+  index: 'bedroom_256'
 
   # resume
   is_resume: False

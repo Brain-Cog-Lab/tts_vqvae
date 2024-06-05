@@ -1,1 +1,1 @@
-python exp/snn_te/2/snn_te_2.py --base exp/snn_te/2/snn_te_2.yaml
+python train/stage_1/snn_te_bedroom.py --base train/stage_1/snn_te_bedroom.yaml

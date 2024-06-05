@@ -22,6 +22,7 @@ if __name__ == "__main__":
     os.makedirs(save_dir, exist_ok=True)
 
     # get unfold dir for dvs
+    unfold_dir = None
     if config.sample_params.time_unfold:
         unfold_dir = os.path.join('./res', config.exp.name, config.exp.index,
                                   'unfold')

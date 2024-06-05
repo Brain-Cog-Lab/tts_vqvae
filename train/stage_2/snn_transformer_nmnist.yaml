@@ -37,7 +37,7 @@ model:
         snn_decoder: dvs
         time_step: 4
 
-        ckpt_path: res/snn_te_dvs/1/ckpt/epoch=99-step=187600.ckpt
+        ckpt_path: res/snn_te_dvs/nmnist/ckpt/epoch=99-step=187600.ckpt
 
         embed_dim: 256
         n_embed: 1024

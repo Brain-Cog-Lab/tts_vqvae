@@ -11,8 +11,8 @@ exp:
 sampler:
   target: src.sample.BaseSampler
   params:
-    gen_config_path: exp/snn_transformer/9/snn_transformer_9.yaml
-    gen_ckpt_path: res/snn_transformer/9/ckpt/epoch=99-step=46900.ckpt
+    gen_config_path: train/stage_2/snn_transformer_nmnist.yaml
+    gen_ckpt_path: res/snn_transformer/nmnist/ckpt/epoch=99-step=46900.ckpt
     batch_size: 64
     code_h: 4
     code_w: 4
@@ -22,4 +22,4 @@ sampler:
 sample_params:
   num_samples: 100
   temperature: 1.0
-  time_unfold: true
+  time_unfold: false

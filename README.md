@@ -38,11 +38,16 @@ This paper presents a novel approach leveraging Spiking Neural Networks (SNNs) t
 
 The overview of proposed method is as follows:
 
-![Overview](./resources/pipeline_3.png)
+<p align="center">
+  <img src="./resources/pipeline_3.png" alt="overview" width="800"/>
+</p>
 
 The activation of temporal codebook represents a spatiotemporal trajectory, akin to the activation of time cells, as illustrated below:
 
-![trajectory](./resources/timecell.png)
+<p align="center">
+  <img src="./resources/timecell.png" alt="trajectory" width="600"/>
+</p>
+
 
 
 ## SetUp

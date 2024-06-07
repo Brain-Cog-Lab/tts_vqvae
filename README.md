@@ -1,7 +1,19 @@
 # Time Cell Inspired Temporal Codebook in Spiking Neural Networks for Enhanced Image Generation
 
+![Static Badge](https://img.shields.io/badge/paper-arxiv-darkred?link=https%3A%2F%2Farxiv.org%2Fabs%2F2405.14474)
+![Static Badge](https://img.shields.io/badge/BrainCog-darkgreen?link=https%3A%2F%2Fgithub.com%2FBrainCog-X%2FBrain-Cog)
 
-**This is the official implementation of "Time Cell Inspired Temporal Codebook in Spiking Neural Networks for Enhanced Image Generation".**
+
+
+**This is the official implementation of "Time Cell Inspired Temporal Codebook in Spiking Neural Networks for Enhanced Image Generation". The GIFs above show the generated event-based NMNIST data**
+
+<p align="center">
+  <img src="./resources/n1.gif" alt="Image 1" width="100"/>
+  <img src="./resources/n2.gif" alt="Image 2" width="100"/>
+  <img src="./resources/n3.gif" alt="Image 3" width="100"/>
+  <img src="./resources/n4.gif" alt="Image 3" width="100"/>
+  <img src="./resources/n5.gif" alt="Image 3" width="100"/>
+</p>
 
 ## Table of Contents
 
@@ -192,12 +204,15 @@ Here are some explanations for config above:
 ### Results
 
 Generated images of resolution $256 \times 256$.
+
 ![256_show](./resources/show_img_3.png)
 
 Generated images of resolution $64 \times 64$.
+
 ![64_show](./resources/compare_1.png)
 
 Unfold generated event data, comparing our temporal codebook with vanilla codebook.
+
 ![dvs_unfold](./resources/dvs_3.png)
 
 ## Acknowledgement
@@ -228,6 +243,6 @@ Unfold generated event data, comparing our temporal codebook with vanilla codebo
     7. - [x] sample static
     8. - [x] sample event
 - [ ] decorate README.md
-    1. - [ ] add shield.io badge (arxiv, license, braincog)
+    1. - [x] add shield.io badge (arxiv, license, braincog)
     2. - [ ] requirements and URL in Installation
-    3. - [ ] add event GIF in Results
+    3. - [x] add event GIF

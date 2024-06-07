@@ -53,7 +53,7 @@ The activation of temporal codebook represents a spatiotemporal trajectory, akin
 ## SetUp
 We use 4 x A100 40G to train proposed model.
 ```
-git clone 
+git clone git@github.com:Brain-Cog-Lab/tts_vqvae.git
 cd tts_vqvae
 pip install -r requirements.txt
 ```

@@ -1,7 +1,9 @@
 # Time Cell Inspired Temporal Codebook in Spiking Neural Networks for Enhanced Image Generation
 
-![Static Badge](https://img.shields.io/badge/paper-arxiv-darkred?link=https%3A%2F%2Farxiv.org%2Fabs%2F2405.14474)
-![Static Badge](https://img.shields.io/badge/BrainCog-darkgreen?link=https%3A%2F%2Fgithub.com%2FBrainCog-X%2FBrain-Cog)
+<img alt="Static Badge" src="https://img.shields.io/badge/paper-arxiv-darkred?link=https%3A%2F%2Farxiv.org%2Fabs%2F2405.14474">
+
+<img alt="Static Badge" src="https://img.shields.io/badge/BrainCog-darkgreen?link=https%3A%2F%2Fgithub.com%2FBrainCog-X%2FBrain-Cog">
+
 
 
 

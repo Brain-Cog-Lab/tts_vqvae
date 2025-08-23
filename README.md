@@ -28,6 +28,15 @@
   - [Sample](#sample)
     - [Script](#script)
     - [Results](#results)
+  - [Model Architecture](#model-architecture)
+    - [Overall Architecture](#overall-architecture)
+    - [Encoder and Decoder Architectures](#encoder-and-decoder-architectures)
+      - [Table: Encoder Architecture](#table-encoder-architecture)
+      - [Table: Decoder Architecture](#table-decoder-architecture)
+      - [Table: ResnetBlockSnn Architecture](#table-resnetblocksnn-architecture)
+      - [Table: Overall Architecture Summary](#table-overall-architecture-summary)
+    - [Experiments Details](#experiments-details)
+      - [Table: Configuration for Experiments](#table-configuration-for-experiments)
   - [Acknowledgement](#acknowledgement)
   - [BibTeX](#bibtex)
   - [To-Do](#to-do)
@@ -219,6 +228,121 @@ Generated images of resolution $64 \times 64$.
 Unfold generated event data, comparing our temporal codebook with vanilla codebook.
 
 ![dvs_unfold](./resources/dvs_3.png)
+
+
+## Model Architecture
+
+### Overall Architecture
+
+We provide a comprehensive overview of the proposed temporal VQ-VAE architecture in the table below (Table: Overall Architecture Summary). The **Stage** column represents the abstract stages of information processing, ordered sequentially from lower to higher indices. The **Component** and **Class** columns specify the attribute names and corresponding classes (typically `nn.Module`) for each stage, corresponding to the code repository above. The **Description** column provides a textual explanation of each stage's functionality.
+
+### Encoder and Decoder Architectures
+
+This section provides a comprehensive description of the model architectures employed in the temporal VQ-VAE. The encoder architecture is detailed in the table below (Table: Encoder Architecture), while the decoder architecture is outlined in the table below (Table: Decoder Architecture). Both the encoder and decoder are constructed using the `ResnetBlockSnn` and `AttnBlockSnn` modules. The `AttnBlockSnn` module represents an attention mechanism implemented SNN, as described in [Li et al., 2022](#). The `ResnetBlockSnn` module adopts a ResNet-style architecture, with its configuration specified in the table below (Table: ResnetBlockSnn Architecture).
+
+Within the `ResnetBlockSnn`, the **Main path** begins with a normalization step utilizing Group Norm, followed by the application of a LIF-Nonlinearity. (LIF-Nonlinearity is a nonlinear mapping composed of LIFNode, which is implemented as the input multiplied by the LIF output.) A 2D convolution is then performed with a kernel size of 3, a stride of 1, and padding of 1. This is succeeded by another LIF-Nonlinearity, incorporating time embedding addition, and a second Group Norm normalization, concluding with a final LIF-Nonlinearity. Concurrently, the **Shortcut path** employs a 2D convolution with a kernel size of either 1 or 3, depending on conditional requirements, and a stride of 1 with padding of 1. The output is obtained by summing the results of the Main path and the Shortcut path, thereby facilitating enhanced feature learning through incremental adjustments via the shortcut connection.
+
+The encoder architecture, as presented in the table below (Table: Encoder Architecture), operates through a structured forward process. The **Input** stage initiates with a 2D convolution operation characterized by a kernel size of 3, a stride of 1, and padding of 1. This is followed by the **DownSample** stage, which incorporates \( N_{blocks} \) residual blocks (`ResnetBlockSnn`) and an attention block (`AttnBlockSnn`), concluding with a strided convolution for downsampling, executed once per level except in the last level. This sequence is repeated \( N_{res} \) times to achieve the desired resolution levels. The **Middle** stage then includes a series of operations: a `ResnetBlockSnn`, an `AttnBlockSnn`, another `ResnetBlockSnn`, and a normalization step using Group Norm, each performed once. The **Output** stage finalizes the process with a 2D convolution employing the same parameters (kernel size of 3, stride of 1, padding of 1) followed by Group Norm. This design efficiently processes the input across multiple resolution levels and residual connections, thereby enhancing feature extraction and representation.
+
+The decoder architecture, as delineated in the table below (Table: Decoder Architecture), proceeds through a systematic forward process. The **Input** stage begins with a 2D convolution applied to the latent representation \( z \), executed once. This is followed by the **Middle** stage, which comprises a `ResnetBlockSnn`, an `AttnBlockSnn`, and a `ResnetBlockSnn`, each performed once. The **UpSample** stage then ensues, featuring a `ResnetBlockSnn` and an `AttnBlockSnn`, both repeated \( N_{blocks} + 1 \) times, followed by a transpose convolution for upsampling, iterated once per level except in the last level, with the entire sequence repeated \( N_{res} \) times across resolution levels. The **Output** stage concludes by applying a normalization step using Group Norm, an LIF node, and a 2D convolution to generate the output channels, each executed once. This architecture effectively reconstructs the output by progressively upsampling and refining the latent representation through multiple stages and residual connections.
+
+---
+
+#### Table: Encoder Architecture
+**Caption**: **Encoder Architecture.** \( N_{res} \) is the number of resolution levels, and \( N_{blocks} \) is the number of residual blocks per level.
+
+| **Stage**        | **Layers & Operations**            | **Repetitions**       |
+| ---------------- | ---------------------------------- | --------------------- |
+| **Input**        | `Conv2d` (k=3, s=1, p=1)           | 1                     |
+| **DownSample**   | `ResnetBlockSnn`                   | \( N_{blocks} \)      |
+|                  | `AttnBlockSnn`                     | \( N_{blocks} \)      |
+|                  | `Downsample` (Strided convolution) | 1 (Not in last level) |
+| **(DownSample)** | **× \( N_{res} \) DownSample**     |                       |
+| **Middle**       | `ResnetBlockSnn`                   | 1                     |
+|                  | `AttnBlockSnn`                     | 1                     |
+|                  | `ResnetBlockSnn`                   | 1                     |
+| **Output**       | `Normalize` (Group Norm)           | 1                     |
+|                  | `LIFNode`                          | 1                     |
+|                  | `Conv2d` (k=3, s=1, p=1)           | 1                     |
+
+---
+
+#### Table: Decoder Architecture
+**Caption**: **Decoder Architecture.** \( N_{res} \) is the number of resolution levels, and \( N_{blocks} \) is the number of base residual blocks per level.
+
+| **Stage**      | **Layers & Operations**             | **Repetitions**       |
+| -------------- | ----------------------------------- | --------------------- |
+| **Input**      | `Conv2d` (from latent \( z \))      | 1                     |
+| **Middle**     | `ResnetBlockSnn`                    | 1                     |
+|                | `AttnBlockSnn`                      | 1                     |
+|                | `ResnetBlockSnn`                    | 1                     |
+| **UpSample**   | `ResnetBlockSnn`                    | \( N_{blocks} + 1 \)  |
+|                | `AttnBlockSnn`                      | \( N_{blocks} + 1 \)  |
+|                | `Upsample` (Transpose convolution)  | 1 (Not in last level) |
+| **(UpSample)** | **× \( N_{res} \) UpSample Stages** |                       |
+| **Output**     | `Normalize` (Group Norm)            | 1                     |
+|                | `LIFNode`                           | 1                     |
+|                | `Conv2d` (to output channels)       | 1                     |
+
+---
+
+#### Table: ResnetBlockSnn Architecture
+**Caption**: **ResnetBlockSnn Architecture.**
+
+| **Path**     | **Layers & Operations**                       |
+| ------------ | --------------------------------------------- |
+| **Main**     | `Normalize` (Group Norm)                      |
+|              | `LIF-Nonlinearity`                            |
+|              | `Conv2d` (k=3, s=1, p=1)                      |
+|              | `LIF-Nonlinearity => Time Embedding Addition` |
+|              | `Normalize` (Group Norm)                      |
+|              | `LIF-Nonlinearity`                            |
+|              | `Dropout`                                     |
+|              | `Conv2d` (k=3, s=1, p=1)                      |
+| **Shortcut** | `Conv2d` (k=1 or k=3, Conditional)            |
+| **Output**   | **Main Path + Shortcut Path**                 |
+
+---
+
+#### Table: Overall Architecture Summary
+**Caption**: **Overall Architecture Summary**
+
+| **Stage**              | **Component**     | **Class**            | **Description**                                                                                                                                                      |
+| ---------------------- | ----------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. SNN Input Encoding  | `snn_encoder`     | `SnnEncoder`         | Converts the static input image into a temporal sequence of tensors over a specified number of time steps.                                                           |
+| 2. Feature Extraction  | `encoder`         | `EncoderSnn`         | An SNN-based convolutional encoder that processes the temporal sequence to produce a compressed latent representation.                                               |
+| 3. Pre-Quantization    | `quant_conv`      | `torch.nn.Conv2d`    | A 1x1 convolution that projects the latent representation from the encoder's channel dimension to the codebook's embedding dimension.                                |
+| 4. Quantization        | `quantize`        | `VectorQuantizerSnn` | Maps the continuous latent vectors to the nearest discrete vectors in a learned codebook. This produces the quantized latent representation and the commitment loss. |
+| 5. Post-Quantization   | `post_quant_conv` | `torch.nn.Conv2d`    | A 1x1 convolution that projects the quantized representation back from the embedding dimension to the latent space dimension.                                        |
+| 6. Reconstruction      | `decoder`         | `DecoderSnn`         | An SNN-based convolutional decoder that reconstructs the temporal sequence from the quantized latent representation.                                                 |
+| 7. SNN Output Decoding | `snn_decoder`     | `SnnDecoder`         | Decodes the reconstructed temporal sequence into a single static output image.                                                                                       |
+| 8. Loss Calculation    | `loss`            | Custom Module        | A composite loss module that calculates both an **autoencoder loss** (reconstruction + quantization) and a **discriminator loss** to train the model adversarially.  |
+
+
+### Experiments Details
+
+This section describes the experimental settings across various datasets, as outlined in the table below (Table: Configuration for Experiments). The settings are configured with dataset-specific parameters to ensure optimal performance. The batch sizes vary across datasets, with CelebA and Bedroom utilizing 64 and 32 respectively, while MNIST, FashionMNIST, CIFAR-10, N-MNIST, and DVS-CIFAR10 employ 128, 128, 128, 64, and 64 respectively. Training epochs range from 100 for CelebA, Bedroom, MNIST, and FashionMNIST, to 200 for CIFAR-10, N-MNIST, and DVS-CIFAR10. The time step and embedding dimension are consistently set at 4 and 256 across all datasets. The number of residual blocks is uniformly 2, while the starting discriminator values differ, with CelebA and Bedroom initiating at 30001-s, MNIST and FashionMNIST at 10-e, and CIFAR-10, N-MNIST, and DVS-CIFAR10 at 50-e and 5-e ("e" denotes Epoch and "s" denotes Step). The discriminator weight is fixed at 0.8, and the Adam optimizer is used with a base learning rate of 0.000045 across all experiments. The `seed` is the seed for all random settings. These configurations ensure a robust and consistent evaluation framework tailored to the characteristics of each dataset.
+
+---
+
+#### Table: Configuration for Experiments
+**Caption**: **Configuration for Experiments for Datasets and Event Datasets**
+
+| **Settings**    | **CelebA** | **Bedroom** | **MNIST** | **FashionMNIST** | **CIFAR-10** | **N-MNIST** | **DVS-CIFAR10** |
+| --------------- | ---------- | ----------- | --------- | ---------------- | ------------ | ----------- | --------------- |
+| `batch size`    | 64         | 32          | 128       | 128              | 128          | 64          | 64              |
+| `epoch`         | 100        | 30          | 100       | 100              | 200          | 100         | 200             |
+| `time step`     | 4          | 6           | 4         | 4                | 4            | 4           | 4               |
+| `embed_dim`     | 256        | 256         | 256       | 256              | 256          | 256         | 256             |
+| `num_res_block` | 2          | 2           | 2         | 2                | 2            | 2           | 2               |
+| `disc_start`    | 30001-s    | 30001-s     | 10-e      | 10-e             | 50-e         | 5-e         | 50-e            |
+| `disc_weight`   | 0.8        | 0.8         | 0.8       | 0.8              | 0.8          | 0.8         | 0.8             |
+| `optimizer`     | Adam       | Adam        | Adam      | Adam             | Adam         | Adam        | Adam            |
+| `betas`         | (0.5,0.9)  | (0.5,0.9)   | (0.5,0.9) | (0.5,0.9)        | (0.5,0.9)    | (0.5,0.9)   | (0.5,0.9)       |
+| `base_lr`       | 0.0000045  | 0.0000045   | 0.0000045 | 0.0000045        | 0.0000045    | 0.0000045   | 0.0000045       |
+| `seed`          | 42         | 42          | 42        | 42               | 42           | 42          | 42              |
+| `type`          | static     | static      | static    | static           | static       | event       | event           |
+
 
 ## Acknowledgement
 

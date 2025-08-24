@@ -38,6 +38,7 @@
       - [Table: Overall Architecture Summary](#table-overall-architecture-summary)
   - [Experiments Details](#experiments-details)
       - [Table: Configuration for Experiments](#table-configuration-for-experiments)
+  - [Learning Dynamic of Training Losses](#learning-dynamic-of-training-losses)
   - [Acknowledgement](#acknowledgement)
   - [BibTeX](#bibtex)
   - [To-Do](#to-do)
@@ -349,6 +350,10 @@ This section describes the experimental settings across various datasets, as out
 | `seed`          | 42         | 42          | 42        | 42               | 42           | 42          | 42              |
 | `type`          | static     | static      | static    | static           | static       | event       | event           |
 
+## Learning Dynamic of Training Losses
+We provide supplementary visualizations of the model training losses. Specifically, the figure below illustrates the training metrics for the CelebA, CIFAR-10, FashionMNIST, and MNIST datasets. These metrics include: **Total Loss**, representing the overall training loss; **Disc Weight**, a learnable parameter corresponding to the mixing factor of the auxiliary discriminator; **Disc Loss**, the loss of the auxiliary discriminator; **Gen Loss**, the loss of the generator derived from the discriminator's output; **NLL**, the negative log-likelihood based on the assumption that the VAE output follows a normal distribution; **Quant Loss**, the loss associated with the codebook quantization process; and **Fake & Real Logits**, which are the logits output by the auxiliary discriminator for real data and the VAE-generated fake data, respectively. These logits can be used to compute the distance between the data distribution modeled by the VAE and the true data distribution. Total Loss curve exhibits jumps in the early stages of training, corresponding to the activation of the auxiliary discriminator, which induces changes in the loss dynamics.
+
+![losses](./resources/draw_losses_ai.png)
 
 ## Acknowledgement
 

@@ -361,15 +361,6 @@ We provide supplementary visualizations of the model training losses. Specifical
 - The implementation of FID in this work is from [pytorch-fid](https://github.com/mseitzer/pytorch-fid)
 - The implementations of IS, PRC, KID in this work are from [torch-fidelity](https://github.com/toshas/torch-fidelity)
 
-## BibTeX
-```
-@article{feng2024time,
-  title={Time Cell Inspired Temporal Codebook in Spiking Neural Networks for Enhanced Image Generation},
-  author={Feng, Linghao and Zhao, Dongcheng and Shen, Sicheng and Dong, Yiting and Shen, Guobin and Zeng, Yi},
-  journal={arXiv preprint arXiv:2405.14474},
-  year={2024}
-}
-```
 ## To-Do
 
 - [x] finish scripts
